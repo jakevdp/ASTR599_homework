@@ -1,0 +1,11 @@
+HW5: Debugging
+
+To start, I decided to go old school: it seemed like the error threw enough info (type or casting issues: using a tuple), so I wanted to see what I could do manually.  However, when I started inserting print statements, it appeared that these will not work when called from a subroutine.
+
+I tried the debugger next: I used pbd via the "%run -d" command in the notebook.  The debugger seemed to skip quickly through the code when I used the "n" command, but then realized I needed to use the "s" command to step into subroutines, etc.  I quickly resolved the first issue: a comma placed at the end of the apply_optimizer return statement was creating a list of tuples instead of a list of integers.  Removing the comma fixed this issue.
+
+The second issue I encountered: the code would run through to the end with the sum() call repaired, but the code was outputing "0" for the 2nd, 3rd, and 4th optimizer's function calls.  To determine if there was an issue with the inputs being passed to the optimizers, I re-ran the code, but removing optimize.brenth from the list of optimizers.  This showed that the bug wasn't due to the particular optimizer, because an accurate function call count would always appear for the first optimizer, but would equal 0 for any subsequent optimizer.
+
+Next, I ran the debugger and placed a break point when apply_optimizer was called.  I realized that the function was not being called, as it never entered into that code block.  That lead me to conclude that something in the for-loop was at fault: iterating over param_grid was not working.
+
+At this point, frustration set in.  Not knowing much about the itertools.product object, I felt like I didn't have much to work with.  Printing param_grid only told me that it was a product object, and I didn't know what to do.  I decided that if the param_grid was at fault, perhaps reinitializing it within the loop over the set of optimizers within compare_optimizers would help.  This solved the problem, but I don't understand a) what the second problem was caused by, or b) why this solution fixed the issue.
