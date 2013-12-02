@@ -8,7 +8,13 @@ C = 299792.458  # km/s
 class Cosmology(object):
     """Cosmology class implementing Cosmological Distance Functions
 
-    <write an appropriate doc-string: be sure to reference Hogg paper>
+	import Cosmology
+	cosmo = Cosmology(OmegaM=0.3, h=0.7)
+	cosmo.DC(0)
+	cosmo.DM(10)
+	
+	All equations derived from Hogg 1999 Distance Measures
+	http://arxiv.org/abs/astroph/9905116
     """
     def __init__(self, OmegaM=0.3, h=0.7):
         # for now, we'll implement only
@@ -33,7 +39,7 @@ class Cosmology(object):
 
         Computes the total line-of-sight comoving distance to a redshift of z
         """
-        return self.DH*scipy.integrate.quad(_Einv, 0, z)
+        return self.DH*integrate.quad(self._Einv, 0, z)[0]
         
     def DM(self, z):
         """Transverse Comoving Distance (Mpc)
@@ -44,11 +50,11 @@ class Cosmology(object):
         times the transverse comoving distance
         """
         if self.OmegaK > 0:
-            return self.DH/np.sqrt(self.OmegaK)*np.sinh(np.sqrt(self.OmegaK)*DC(z)/self.DH)
+            return self.DH/np.sqrt(self.OmegaK)*np.sinh(np.sqrt(self.OmegaK)*self.DC(z)/self.DH)
         if self.OmegaK == 0:
-            return DC(z)
+            return self.DC(z)
         if self.OmegaK < 0:
-            return self.DH/np.sqrt(self.OmegaK)*np.sin(np.sqrt(self.OmegaK)*DC(z)/self.DH)
+            return self.DH/np.sqrt(self.OmegaK)*np.sin(np.sqrt(self.OmegaK)*self.DC(z)/self.DH)
         
     def DA(self, z):
         """Angular Diameter Distance (Mpc)
@@ -57,7 +63,7 @@ class Cosmology(object):
         its angular size in radians. It is used to convert angular
         separations in telescope images to proper separations at the source.
         """
-        return DM(z)/(1 + z)
+        return self.DM(z)/(1 + z)
 
     def DL(self, z):
         """Luminosity Distance (Mpc)
@@ -65,7 +71,7 @@ class Cosmology(object):
         The relationship between bolometric flux and bolometric luminosity
         """
         
-        return (1 + z)*DM(z)
+        return (1 + z)*self.DM(z)
 
     def mu(self, z):
         """Distance Modulus (magnitudes)
@@ -74,4 +80,4 @@ class Cosmology(object):
         flux and what it would be if it were at 10 pc
         """
 
-        return 5.*np.log10(DL(z)/10./1e6)
+        return 5.*np.log10(self.DL(z)*1e6/10.)
