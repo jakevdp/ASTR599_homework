@@ -1,0 +1,26 @@
+%matplotlib inline
+import sys
+sys.path.append('/Library/Frameworks/Python.framework/Versions/7.3/lib/python2.7/site-packages/astropy-0.2.5-py2.7-macosx-10.5-i386.egg')
+import astropy.io.fits as fits
+import matplotlib.pyplot as plt
+
+
+import numpy as np
+# this is goofy--but it makes a visible pattern!
+x, y = np.ogrid[-10:10, -10:10]
+x.shape, y.shape
+n = np.sqrt(x**2 + y**2)
+n.shape # we have a 2D array!
+
+def Jaffe(r, r0=1):
+    '''function to create Jaffe profile, given radius and r0'''
+    rho0 = 3/(4*np.pi*r0**3.)
+    rho = (rho0/4*np.pi)*(r/r0)**-2.*(1+(r/r0))**-2.
+    return rho
+
+deV = Jaffe(n, r0=10)    
+plt.imshow(deV)
+plt.show()
+
+hdu = fits.PrimaryHDU(deV)
+hdu.writeto('deV_galaxy.fits')
