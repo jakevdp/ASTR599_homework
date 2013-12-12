@@ -1,0 +1,217 @@
+import numpy as np
+from scipy import integrate
+
+# speed of light
+C = 299792.458  # km/s
+
+
+class Cosmology(object):
+    """Cosmology class implementing Cosmological Distance Functions
+
+    Calculate the cosmological distances in Mpc given the redshift z [1]. 
+    
+    Parameters
+    ----------
+    OmegaM : float, optional
+             The dimensionless cosmological mass density parameter. Default OmegaM=0.3 
+    h : float, optional
+        The dimensionless Hubble  parameter. Default h = 0.7
+    
+    Methods
+    -------
+    DC - Comoving Distance 
+    DM - Transverse Comoving Distance
+    DA - Angular Diameter Distance
+    DL - Luminosity Distance
+    mu - Distance modulus 
+     
+    Examples
+    --------
+    >>> from cosmology import Cosmology
+    >>> cosmo = Cosmology()
+
+    References
+    ----------
+    ..[1] 'Distance measures in cosmology', David W. Hogg (2000).   
+    
+
+    """
+    def __init__(self, OmegaM=0.3, h=0.7):
+        # for now, we'll implement only
+        # a flat cosmology for simplicity
+        self.OmegaK = 0
+        self.OmegaM = OmegaM
+        self.OmegaL = 1. - OmegaM
+
+        # Hubble constant, km/s/Mpc
+        self.H0 = h * 100
+
+        # Hubble Distance, Mpc
+        self.DH = C / self.H0
+
+    def _Einv(self, z):
+        # implement the inverse of Eqn 14. This is the function that will be
+        # integrated in order to compute other quantities
+        return 1.0/np.sqrt(self.OmegaM*(1.0+z)**3.0 + self.OmegaK *(1.0+z)**2.0 + self.OmegaL)
+
+    def DC(self, z):
+        """
+        Calculate the Comoving Distance [Mpc]
+
+        Parameters
+        ----------
+        z : float 
+            The redshift up to which the function integrates to find the distance
+        
+        Returns
+        -------
+        y : float
+            The comoving distance calculated
+            
+        Examples
+        --------
+        >>> cosmo = Cosmology()
+        >>> cosmo.DC(2.4)
+        5708.833503068415
+   
+        Notes
+        -----
+        The function uses scipy.integrate.quad for integration
+        
+        References
+        ----------
+        Eqn. 15 of [1]
+        """
+        # Compute the comoving distance in Mpc using scipy.integrate.quad
+        # following Eqn 15
+        return self.DH * integrate.quad(self._Einv,0,z)[0]
+
+    def DM(self, z):
+        """
+        Calculate the Transverse Comoving Distance [Mpc]
+
+        Parameters
+        ----------
+        z : float 
+            The redshift up to which the function integrates to find the distance
+        
+        Returns
+        -------
+        y : float
+            The transverse comoving distance calculated
+            
+        Examples
+        --------
+        >>> cosmo = Cosmology()
+        >>> cosmo.DM(2.4)
+        5708.833503068415
+        
+        Notes
+        -----
+        The output depends on whether OmegaK > = < 0 
+        
+        References
+        ----------
+        Eqn. 16 of [1]
+        """
+        # Compute the transverse comoving distance in Mpc (Eqn 16)
+        if self.OmegaK == 0.0:
+            return self.DC(z)   
+        else:
+            return ( self.DH / np.sqrt(abs(self.OmegaK)) ) * np.sinh(np.sqrt(abs(self.OmegaK))*self.DC(z)/self.DH)
+
+    def DA(self, z):
+        """
+        Calculate the Angular Diameter Distance [Mpc]
+
+        Parameters
+        ----------
+        z : float 
+            The redshift up to which the function integrates to find the distance
+        
+        Returns
+        -------
+        y : float
+            The angular diameter distance calculated
+            
+        Examples
+        --------
+        >>> cosmo = Cosmology()
+        >>> cosmo.DA(2.4)
+        1679.068677373063
+
+        Notes
+        -----
+        The function uses scipy.integrate.quad for integration
+        
+        References
+        ----------
+        Eqn. 18 of [1]
+        """
+        # Compute the Angular Diameter distance in Mpc (Eqn 18)
+        return self.DM(z) / (1.0 + z)
+
+    def DL(self, z):
+        """
+        Calculate the Luminosity Distance [Mpc]
+
+        Parameters
+        ----------
+        z : float 
+            The redshift up to which the function integrates to find the distance
+        
+        Returns
+        -------
+        y : float
+            The luminosity distance calculated
+            
+        Examples
+        --------
+        >>> cosmo = Cosmology()
+        >>> cosmo.DL(2.4)
+        19410.03391043261
+        
+        Notes
+        -----
+        There is a mathematical equality of the two expressions for DL:
+        DL = (1+z) * DM = (1+z)*(1+z)* DA
+        Here use the DA equality.
+        
+        References
+        ----------
+        Eqn. 21 of [1]
+        """
+        # Compute the Luminosity Distance in Mpc (Eqn 21)
+        return ((1.0 + z)**(2.0)) * self.DA(z)
+
+    def mu(self, z):
+        """
+        Calculate the Distance Modulus [magnitudes]
+
+        Parameters
+        ----------
+        z : float 
+            The redshift at which the distance is calculated
+        
+        Returns
+        -------
+        y : float
+            The distance modulus calculated
+            
+        Examples
+        --------
+        >>> cosmo = Cosmology()
+        >>> cosmo.mu(2.4)
+        46.44013147063086
+        
+        Notes
+        -----
+        Because it uses DL, which inherits from DM, the value depends on whether 
+        OmegaK > = < 0 
+        
+        References
+        ----------
+        Eqn. 25 of [1]
+        """
+        # Compute the distance modulus (Eqn 25)
+        return 5.0 * np.log10(self.DL(z) * 1e6 / 10.0)
