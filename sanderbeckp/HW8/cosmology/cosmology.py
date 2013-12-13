@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-#%%file cosmology.py
-=======
->>>>>>> 03749cc8c76066974d9fc99a7bf0963e4e82b7f8
 import numpy as np
 from scipy import integrate
 
@@ -12,7 +8,7 @@ C = 299792.458  # km/s
 class Cosmology(object):
     """Cosmology class implementing Cosmological Distance Functions
 
-    Equation used in this code are taken from Hogg 1999
+    Equations used in this code are taken from Hogg 1999
     """
     def __init__(self, OmegaM=0.3, h=0.7):
         # for now, we'll implement only
@@ -30,11 +26,8 @@ class Cosmology(object):
     def _Einv(self, z):
         # implement the inverse of Eqn 14. This is the function that will be
         # integrated in order to compute other quantities
-<<<<<<< HEAD
-	return 1./(self.OmegaM*(1+z)**3.+self.OmegaK*(1+z)**2.+self.OmegaL)**(0.5)      
-=======
-	return 1./(self.OmegaM*(1+z)**3.+self.OmegaK*(1+z)**2.+self.OmegaL)**(0.5)       
->>>>>>> 03749cc8c76066974d9fc99a7bf0963e4e82b7f8
+		return 1./(self.OmegaM*(1+z)**3.+self.OmegaK*(1+z)**2.+self.OmegaL)**(0.5)      
+
 	
 
     def DC(self, z):
@@ -83,8 +76,4 @@ class Cosmology(object):
         Input z
         """
         # Compute the distance modulus (Eqn 25)
-<<<<<<< HEAD
 	return 5.*np.log10(1000000.*self.DL(z)/10.)
-=======
-	return 5.*numpy.log10(self.DL(z)/10.)
->>>>>>> 03749cc8c76066974d9fc99a7bf0963e4e82b7f8
