@@ -1,6 +1,9 @@
 ASTR599_homework
 ================
 
+**Note: this is the 2013 repository. If you're taking the 2014 class, you're looking for [this](https://github.com/uw-python/2014_Astr599_HW)**
+
+
 Repository for students to submit homework assignments as pull requests.
 
 Please [fork this repository](https://help.github.com/articles/fork-a-repo)
